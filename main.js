@@ -43,9 +43,22 @@ function prev() {
 }
 
 function update() {
-  views.forEach(v => v.classList.remove('active'));
-  contents.forEach(c => c.classList.remove('active'));
+  // Скрываем контент
+  document.querySelector('.content').classList.remove('visible');
 
-  document.querySelector(`.view[data-view="${current}"]`).classList.add('active');
-  document.querySelector(`.content-item[data-content="${current}"]`).classList.add('active');
+  // Меняем картинку сразу
+  views.forEach(v => v.classList.remove('active'));
+  document
+    .querySelector(`.view[data-view="${current}"]`)
+    .classList.add('active');
+
+  // Небольшая пауза перед показом контента
+  setTimeout(() => {
+    contents.forEach(c => c.classList.remove('active'));
+    document
+      .querySelector(`.content-item[data-content="${current}"]`)
+      .classList.add('active');
+
+    document.querySelector('.content').classList.add('visible');
+  }, 50); // 0.05 сек
 }
