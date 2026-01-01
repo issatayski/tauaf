@@ -73,3 +73,12 @@ h2 {
     transform: translateY(0);
   }
 }
+/* Контент с задержкой появления */
+.content {
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.content.visible {
+  opacity: 1;
+}
