@@ -8,20 +8,17 @@
 html, body {
     width: 100%;
     height: 100%;
-    overflow: hidden; /* Запрещаем системный скролл */
+    overflow: hidden;
     background: #000;
-    font-family: sans-serif;
+    font-family: -apple-system, sans-serif;
 }
 
 #app {
     position: relative;
     width: 100%;
     height: 100%;
-    display: flex;
-    flex-direction: column;
 }
 
-/* Область свайпов и картинок */
 .viewer-container {
     position: absolute;
     top: 0;
@@ -29,14 +26,15 @@ html, body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    touch-action: none; /* КРИТИЧНО: отключает браузерные жесты */
+    touch-action: none;
 }
 
 .viewer {
     display: flex;
-    width: 500%; /* 5 слайдов по 100% */
+    width: 500%;
     height: 100%;
-    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+    /* Плавность вращения самой Каабы */
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .slide {
@@ -46,20 +44,18 @@ html, body {
     background-position: center;
 }
 
-/* Панель контента */
 .content-panel {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: 66.6%; /* Ровно 2/3 экрана */
+    height: 66.6%;
     background: white;
     border-radius: 24px 24px 0 0;
-    transform: translateY(105%); /* Спрятана по умолчанию */
-    transition: transform 0.6s ease;
+    transform: translateY(105%);
+    /* ЗАМЕДЛЕННАЯ СКОРОСТЬ ПОЯВЛЕНИЯ (1.2 секунды для плавности) */
+    transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
     z-index: 10;
-    display: flex;
-    flex-direction: column;
 }
 
 .content-panel.active {
@@ -68,36 +64,21 @@ html, body {
 
 .drag-handle {
     width: 40px;
-    height: 5px;
-    background: #ccc;
-    border-radius: 3px;
+    height: 4px;
+    background: #e0e0e0;
+    border-radius: 2px;
     margin: 15px auto;
-    flex-shrink: 0;
 }
 
 .content-scroll {
-    flex-grow: 1;
-    overflow-y: auto; /* Скролл только внутри текста */
-    padding: 0 25px 40px;
-    color: #333;
+    overflow-y: auto;
+    height: calc(100% - 40px);
+    padding: 0 24px 40px;
+    color: #2c2c2c;
 }
 
-.dua-box {
-    background: #f9f4eb;
-    padding: 15px;
-    border-radius: 12px;
-    margin: 20px 0;
-}
-
-.arabic {
-    font-size: 1.5rem;
-    text-align: right;
-    margin-bottom: 10px;
-}
-
-.translation {
-    font-size: 0.9rem;
-    color: #666;
-    font-style: italic;
-}
+h2 { margin-bottom: 15px; color: #b08d57; font-size: 1.4rem; }
+.dua-box { background: #fdfaf5; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #f0e6d2; }
+.arabic { font-size: 1.6rem; text-align: right; margin-bottom: 8px; }
+.translation { font-size: 0.95rem; color: #555; line-height: 1.5; }
 
