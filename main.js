@@ -1,73 +1,94 @@
-const images = [
-  "img/1.jpg",
-  "img/2.jpg",
-  "img/3.jpg",
-  "img/4.jpg",
-  "img/5.jpg"
-];
-
+const images = ["img/1.jpg", "img/2.jpg", "img/3.jpg", "img/4.jpg", "img/5.jpg"];
 const contents = [
-  "🕋 **Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.<br>Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.<br><br><br>Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisisРакурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisisРакурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.",
-  "🧭 **Северная сторона** — Nulla vitae elit libero, a pharetra augue. Vivamus sagittis lacus vel augue laoreet.",
-  "🌅 **Восточная сторона** — Cras mattis consectetur purus sit amet fermentum. Donec sed odio dui.",
-  "🔥 **Южная сторона** — Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum.",
-  "🌇 **Западная сторона** — Sed posuere consectetur est at lobortis. Curabitur blandit tempus porttitor."
+  "🕋 **Ракурс с Чёрным камнем**...",
+  "🧭 **Северная сторона**...",
+  "🌅 **Восточная сторона**...",
+  "🔥 **Южная сторона**...",
+  "🌇 **Западная сторона**..."
 ];
 
-let current = 0;
-const visual = document.getElementById("visual");
+let current = 1; // Начинаем с 1, так как 0 индекс — это клон последнего слайда
+const strip = document.getElementById("visual-strip");
 const content = document.getElementById("content");
 const text = document.getElementById("text");
 
-function showImage(index, direction = "") {
-  visual.classList.remove("swipe-left", "swipe-right");
-  if (direction) visual.classList.add(direction);
+function init() {
+  // Создаем массив с клонами: [Картинка 5, 1, 2, 3, 4, 5, Картинка 1]
+  const list = [images[images.length - 1], ...images, images[0]];
+  
+  strip.style.width = `${list.length * 100}%`;
 
-  setTimeout(() => {
-    visual.style.backgroundImage = `url(${images[index]})`;
-    visual.classList.remove("swipe-left", "swipe-right");
-  }, 300);
+  list.forEach(src => {
+    const slide = document.createElement("div");
+    slide.className = "slide";
+    slide.style.backgroundImage = `url(${src})`;
+    strip.appendChild(slide);
+  });
+
+  updatePosition(false); // Мгновенный переход к первой настоящей картинке
+  showText();
 }
 
-function showContent(index) {
-  setTimeout(() => {
-    text.innerHTML = contents[index];
-    content.classList.add("active");
-  }, 1500);
+function updatePosition(animate = true) {
+  if (!animate) strip.style.transition = 'none';
+  else strip.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+  
+  strip.style.transform = `translateX(${current * -100}vw)`;
 }
 
-function hideContent() {
-  content.classList.remove("active");
+function showText() {
+  // Определяем реальный индекс контента (вычитаем 1 из-за клона)
+  let realIndex = current - 1;
+  if (current === 0) realIndex = images.length - 1;
+  if (current === images.length + 1) realIndex = 0;
+
+  text.innerHTML = contents[realIndex];
+  content.classList.add("active");
 }
 
-/* Initialize */
-showImage(current);
-showContent(current);
-
-/* Swipe logic */
-let startX = 0;
-let startY = 0;
-
-document.addEventListener("touchstart", (e) => {
-  startX = e.touches[0].clientX;
-  startY = e.touches[0].clientY;
-}, false);
-
-document.addEventListener("touchend", (e) => {
-  const dx = e.changedTouches[0].clientX - startX;
-  const dy = e.changedTouches[0].clientY - startY;
-
-  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
-    hideContent();
-
-    if (dx < 0) { // swipe left → next
-      current = (current + 1) % images.length;
-      showImage(current, "swipe-left");
-    } else { // swipe right → previous
-      current = (current - 1 + images.length) % images.length;
-      showImage(current, "swipe-right");
-    }
-
-    showContent(current);
+function handleInfiniteLoop() {
+  // Если мы на клоне в конце, прыгаем в начало
+  if (current === images.length + 1) {
+    current = 1;
+    updatePosition(false);
   }
-}, false);
+  // Если мы на клоне в начале, прыгаем в конец
+  if (current === 0) {
+    current = images.length;
+    updatePosition(false);
+  }
+}
+
+/* Логика свайпов */
+let startX = 0;
+let isMoving = false;
+
+document.addEventListener("touchstart", e => {
+  if (isMoving) return;
+  startX = e.touches[0].clientX;
+}, {passive: true});
+
+document.addEventListener("touchend", e => {
+  if (isMoving) return;
+  const dx = e.changedTouches[0].clientX - startX;
+
+  if (Math.abs(dx) > 50) {
+    isMoving = true;
+    content.classList.remove("active");
+
+    if (dx < 0) current++; // Свайп влево -> Вперед
+    else current--;        // Свайп вправо -> Назад
+
+    updatePosition(true);
+
+    // Ждем окончания анимации, чтобы проверить зацикливание
+    setTimeout(() => {
+      handleInfiniteLoop();
+      showText();
+      isMoving = false;
+    }, 600); 
+  }
+}, {passive: true});
+
+init();
+
