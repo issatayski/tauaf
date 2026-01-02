@@ -1,77 +1,63 @@
-const slides = document.querySelectorAll('.slide');
-const content = document.querySelector('.content');
-const titleEl = document.getElementById('content-title');
-const textEl = document.getElementById('content-text');
+const viewer = document.getElementById('viewer');
+const contentPanel = document.getElementById('contentPanel');
+const viewTitle = document.getElementById('viewTitle');
 
-const contents = [
-  {
-    title: 'Чёрный камень',
-    text: 'Описание действий и дуа у Чёрного камня. Рыбный текст для примера.'
-  },
-  {
-    title: 'Северная сторона',
-    text: 'Информация для северной стороны Каабы. Рыбный текст.'
-  },
-  {
-    title: 'Восточная сторона',
-    text: 'Описание восточной стороны Каабы и соответствующих дуа.'
-  },
-  {
-    title: 'Южная сторона',
-    text: 'Религиозный контент, связанный с южной стороной.'
-  },
-  {
-    title: 'Западная сторона',
-    text: 'Заключительный ракурс. Текст-заглушка для демонстрации.'
-  }
+const data = [
+    { title: "Черный камень (Аль-Хаджар аль-Асвад)", desc: "Начальная точка Тавафа. Повернитесь лицом к камню и начните обход." },
+    { title: "Северная сторона (Рукн аль-Ираки)", desc: "Сторона, обращенная в сторону Ирака. Здесь находится Хиджр Исмаил." },
+    { title: "Восточная сторона", desc: "Вид на архитектурные особенности восточной стены и проход к Сафа и Марва." },
+    { title: "Южная сторона (Рукн аль-Ямани)", desc: "Йеменский угол. Сунна — коснуться его рукой, если это возможно." },
+    { title: "Западная сторона (Рукн аш-Шами)", desc: "Сирийский угол. Завершение обхода стороны Хиджр Исмаил." }
 ];
 
 let currentIndex = 0;
 let startX = 0;
+let isAnimating = false;
 
-/* Показ контента */
-function showContent() {
-  titleEl.textContent = contents[currentIndex].title;
-  textEl.textContent = contents[currentIndex].text;
-  content.classList.add('visible');
+// Инициализация
+function updateUI() {
+    // 1. Скрываем панель перед сменой
+    contentPanel.classList.remove('visible');
+    
+    // 2. Сдвигаем фон
+    viewer.style.transform = `translateX(-${currentIndex * 100}vw)`;
+
+    // 3. После завершения анимации фона показываем новый контент
+    setTimeout(() => {
+        viewTitle.innerText = data[currentIndex].title;
+        contentPanel.classList.add('visible');
+        isAnimating = false;
+    }, 800); // Задержка чуть больше, чем CSS transition
 }
 
-/* Скрыть контент */
-function hideContent() {
-  content.classList.remove('visible');
-}
-
-/* Переключение слайдов */
-function changeSlide(direction) {
-  const nextIndex = currentIndex + direction;
-  if (nextIndex < 0 || nextIndex >= slides.length) return;
-
-  hideContent();
-
-  const current = slides[currentIndex];
-  const next = slides[nextIndex];
-
-  current.classList.remove('active');
-  next.classList.add('active');
-
-  currentIndex = nextIndex;
-
-  setTimeout(showContent, 350);
-}
-
-/* Touch events */
+// Обработка свайпов
 document.addEventListener('touchstart', e => {
-  startX = e.touches[0].clientX;
-});
+    startX = e.touches[0].clientX;
+}, { passive: true });
 
 document.addEventListener('touchend', e => {
-  const endX = e.changedTouches[0].clientX;
-  const diff = startX - endX;
+    if (isAnimating) return;
 
-  if (Math.abs(diff) > 50) {
-    diff > 0 ? changeSlide(1) : changeSlide(-1);
-  }
-});
+    const endX = e.changedTouches[0].clientX;
+    const diff = startX - endX;
 
-/* Первый показ контента */
-setTimeout(showContent, 600);
+    if (Math.abs(diff) > 50) { // Порог свайпа
+        if (diff > 0 && currentIndex < data.length - 1) {
+            // Свайп влево -> Следующий ракурс
+            currentIndex++;
+            isAnimating = true;
+            updateUI();
+        } else if (diff < 0 && currentIndex > 0) {
+            // Свайп вправо -> Предыдущий ракурс
+            currentIndex--;
+            isAnimating = true;
+            updateUI();
+        }
+    }
+}, { passive: true });
+
+// Первый запуск
+window.onload = () => {
+    updateUI();
+};
+
