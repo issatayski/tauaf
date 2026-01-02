@@ -1,6 +1,6 @@
 
 const images = [
-  "https://source.unsplash.com/random/800x1600/?kaaba,blackstone",
+  "/img/1.jpg",
   "https://source.unsplash.com/random/800x1600/?kaaba,north",
   "https://source.unsplash.com/random/800x1600/?kaaba,east",
   "https://source.unsplash.com/random/800x1600/?kaaba,south",
