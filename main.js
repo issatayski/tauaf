@@ -33,7 +33,7 @@ function showContent(index) {
   setTimeout(() => {
     text.innerHTML = contents[index];
     content.classList.add("active");
-  }, 1000);
+  }, 1500);
 }
 
 function hideContent() {
