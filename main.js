@@ -1,4 +1,3 @@
-
 const images = [
   "img/1.jpg",
   "img/2.jpg",
@@ -8,11 +7,11 @@ const images = [
 ];
 
 const contents = [
-  "🕋 **Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisisРакурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisisРакурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.",
-  "🧭 **Северная сторона** — Nulla vitae elit libero, a pharetra augue. Vivamus sagittis lacus vel augue laoreet.",
-  "🌅 **Восточная сторона** — Cras mattis consectetur purus sit amet fermentum. Donec sed odio dui.",
-  "🔥 **Южная сторона** — Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum.",
-  "🌇 **Западная сторона** — Sed posuere consectetur est at lobortis. Curabitur blandit tempus porttitor."
+  "🕋 **Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet...",
+  "🧭 **Северная сторона** — Nulla vitae elit libero...",
+  "🌅 **Восточная сторона** — Cras mattis consectetur...",
+  "🔥 **Южная сторона** — Etiam porta sem malesuada...",
+  "🌇 **Западная сторона** — Sed posuere consectetur..."
 ];
 
 let current = 0;
@@ -21,31 +20,46 @@ const content = document.getElementById("content");
 const text = document.getElementById("text");
 
 function showImage(index, direction = "") {
+  // Сбрасываем переходы, чтобы мгновенно переместить новую картинку в стартовую позицию
+  visual.style.transition = 'none';
   visual.classList.remove("swipe-left", "swipe-right");
-  if (direction) visual.classList.add(direction);
+  
+  // Устанавливаем новое изображение
+  visual.style.backgroundImage = `url(${images[index]})`;
 
-  setTimeout(() => {
-    visual.style.backgroundImage = `url(${images[index]})`;
-    visual.classList.remove("swipe-left", "swipe-right");
-  }, 300);
+  if (direction) {
+    // Выбираем противоположное направление для "влета"
+    // Если свайп влево (dx < 0), картинка должна прилететь справа
+    const entryClass = (direction === "swipe-left") ? "swipe-right" : "swipe-left";
+    
+    visual.classList.add(entryClass);
+
+    // Принудительно обновляем стили (reflow)
+    visual.offsetHeight;
+
+    // Включаем анимацию обратно и возвращаем картинку в центр
+    visual.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+    visual.classList.remove(entryClass);
+  }
 }
 
 function showContent(index) {
+  // Уменьшил задержку для быстрого появления текста
   setTimeout(() => {
     text.innerHTML = contents[index];
     content.classList.add("active");
-  }, 1000);
+  }, 200); 
 }
 
 function hideContent() {
   content.classList.remove("active");
 }
 
-/* Initialize */
-showImage(current);
+/* Инициализация */
+visual.style.backgroundImage = `url(${images[current]})`;
 showContent(current);
 
-/* Swipe logic */
+/* Логика свайпов */
 let startX = 0;
 let startY = 0;
 
@@ -61,10 +75,10 @@ document.addEventListener("touchend", (e) => {
   if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
     hideContent();
 
-    if (dx < 0) { // swipe left → next
+    if (dx < 0) { // свайп влево → следующая
       current = (current + 1) % images.length;
       showImage(current, "swipe-left");
-    } else { // swipe right → previous
+    } else { // свайп вправо → предыдущая
       current = (current - 1 + images.length) % images.length;
       showImage(current, "swipe-right");
     }
@@ -72,3 +86,4 @@ document.addEventListener("touchend", (e) => {
     showContent(current);
   }
 }, false);
+
