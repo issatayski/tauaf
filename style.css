@@ -1,8 +1,3 @@
-:root {
-    --panel-height: 66.66vh;
-    --transition-speed: 0.6s;
-}
-
 * {
     margin: 0;
     padding: 0;
@@ -10,111 +5,99 @@
     -webkit-tap-highlight-color: transparent;
 }
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Запрещаем системный скролл */
     background: #000;
-    color: #fff;
-    overflow: hidden; /* Запрет системного скролла */
-    height: 100vh;
-    width: 100vw;
+    font-family: sans-serif;
 }
 
 #app {
     position: relative;
     width: 100%;
     height: 100%;
+    display: flex;
+    flex-direction: column;
 }
 
-/* Блок визуализации */
-.viewer {
+/* Область свайпов и картинок */
+.viewer-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
+    overflow: hidden;
+    touch-action: none; /* КРИТИЧНО: отключает браузерные жесты */
+}
+
+.viewer {
     display: flex;
-    transition: transform var(--transition-speed) cubic-bezier(0.23, 1, 0.32, 1);
+    width: 500%; /* 5 слайдов по 100% */
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1);
 }
 
 .slide {
-    min-width: 100vw;
-    height: 100vh;
+    width: 100vw;
+    height: 100%;
     background-size: cover;
     background-position: center;
-    position: relative;
 }
 
-.overlay-label {
-    position: absolute;
-    top: 40px;
-    left: 20px;
-    background: rgba(0,0,0,0.5);
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    backdrop-filter: blur(5px);
-}
-
-/* Контентная панель */
+/* Панель контента */
 .content-panel {
     position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
-    height: var(--panel-height);
+    height: 66.6%; /* Ровно 2/3 экрана */
     background: white;
-    color: #1a1a1a;
-    border-top-left-radius: 24px;
-    border-top-right-radius: 24px;
-    transform: translateY(100%);
-    transition: transform var(--transition-speed) ease-out;
+    border-radius: 24px 24px 0 0;
+    transform: translateY(105%); /* Спрятана по умолчанию */
+    transition: transform 0.6s ease;
     z-index: 10;
-    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
 }
 
-.content-panel.visible {
+.content-panel.active {
     transform: translateY(0);
 }
 
 .drag-handle {
     width: 40px;
-    height: 4px;
-    background: #ddd;
-    border-radius: 2px;
-    margin: 12px auto;
+    height: 5px;
+    background: #ccc;
+    border-radius: 3px;
+    margin: 15px auto;
+    flex-shrink: 0;
 }
 
-.content-inner {
-    padding: 0 24px 40px;
-    height: calc(100% - 30px);
-    overflow-y: auto;
+.content-scroll {
+    flex-grow: 1;
+    overflow-y: auto; /* Скролл только внутри текста */
+    padding: 0 25px 40px;
+    color: #333;
 }
 
-h2 {
-    font-size: 1.5rem;
-    margin-bottom: 20px;
-    color: #b08d57;
+.dua-box {
+    background: #f9f4eb;
+    padding: 15px;
+    border-radius: 12px;
+    margin: 20px 0;
 }
 
 .arabic {
-    font-size: 1.8rem;
-    direction: rtl;
-    text-align: center;
-    margin-bottom: 15px;
-    line-height: 1.4;
-    color: #222;
+    font-size: 1.5rem;
+    text-align: right;
+    margin-bottom: 10px;
 }
 
 .translation {
-    font-style: italic;
+    font-size: 0.9rem;
     color: #666;
-    border-left: 3px solid #b08d57;
-    padding-left: 15px;
-    margin-bottom: 20px;
-}
-
-.description {
-    line-height: 1.6;
-    color: #444;
+    font-style: italic;
 }
 
