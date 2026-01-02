@@ -1,64 +1,77 @@
-let current = 1;
-const total = 5;
+const slides = document.querySelectorAll('.slide');
+const content = document.querySelector('.content');
+const titleEl = document.getElementById('content-title');
+const textEl = document.getElementById('content-text');
 
-const views = document.querySelectorAll('.view');
-const contents = document.querySelectorAll('.content-item');
+const contents = [
+  {
+    title: 'Чёрный камень',
+    text: 'Описание действий и дуа у Чёрного камня. Рыбный текст для примера.'
+  },
+  {
+    title: 'Северная сторона',
+    text: 'Информация для северной стороны Каабы. Рыбный текст.'
+  },
+  {
+    title: 'Восточная сторона',
+    text: 'Описание восточной стороны Каабы и соответствующих дуа.'
+  },
+  {
+    title: 'Южная сторона',
+    text: 'Религиозный контент, связанный с южной стороной.'
+  },
+  {
+    title: 'Западная сторона',
+    text: 'Заключительный ракурс. Текст-заглушка для демонстрации.'
+  }
+];
 
+let currentIndex = 0;
 let startX = 0;
-let endX = 0;
 
-const viewer = document.getElementById('viewer');
+/* Показ контента */
+function showContent() {
+  titleEl.textContent = contents[currentIndex].title;
+  textEl.textContent = contents[currentIndex].text;
+  content.classList.add('visible');
+}
 
-viewer.addEventListener('touchstart', e => {
+/* Скрыть контент */
+function hideContent() {
+  content.classList.remove('visible');
+}
+
+/* Переключение слайдов */
+function changeSlide(direction) {
+  const nextIndex = currentIndex + direction;
+  if (nextIndex < 0 || nextIndex >= slides.length) return;
+
+  hideContent();
+
+  const current = slides[currentIndex];
+  const next = slides[nextIndex];
+
+  current.classList.remove('active');
+  next.classList.add('active');
+
+  currentIndex = nextIndex;
+
+  setTimeout(showContent, 350);
+}
+
+/* Touch events */
+document.addEventListener('touchstart', e => {
   startX = e.touches[0].clientX;
 });
 
-viewer.addEventListener('touchend', e => {
-  endX = e.changedTouches[0].clientX;
-  handleSwipe();
-});
-
-function handleSwipe() {
+document.addEventListener('touchend', e => {
+  const endX = e.changedTouches[0].clientX;
   const diff = startX - endX;
 
-  if (Math.abs(diff) < 50) return;
-
-  if (diff > 0) {
-    next();
-  } else {
-    prev();
+  if (Math.abs(diff) > 50) {
+    diff > 0 ? changeSlide(1) : changeSlide(-1);
   }
-}
+});
 
-function next() {
-  current++;
-  if (current > total) current = 1;
-  update();
-}
-
-function prev() {
-  current--;
-  if (current < 1) current = total;
-  update();
-}
-
-function update() {
-  // Скрываем контент
-  document.querySelector('.content').classList.remove('visible');
-
-  // Меняем картинку сразу
-  views.forEach(v => v.classList.remove('active'));
-  document
-    .querySelector(`.view[data-view="${current}"]`)
-    .classList.add('active');
-
-  // Небольшая пауза перед показом контента
-  setTimeout(() => {
-    contents.forEach(c => c.classList.remove('active'));
-    document
-      .querySelector(`.content-item[data-content="${current}"]`)
-      .classList.add('active');
-
-    document.querySelector('.content').classList.add('visible');
-  }, 50); // 0.05 сек
-}
+/* Первый показ контента */
+setTimeout(showContent, 600);
