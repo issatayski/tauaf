@@ -1,38 +1,18 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ar">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Kaaba Guide — Circular</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaaba Compass Guide</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-    <div id="app">
-        <div class="viewer-container" id="touchArea">
-            <div class="viewer" id="viewer">
-                <div class="slide" style="background-image: url('https://placehold.jp/40/1a1a1a/ffffff/1080x1920.png?text=1.+Черный+камень');"></div>
-                <div class="slide" style="background-image: url('https://placehold.jp/40/2a2a2a/ffffff/1080x1920.png?text=2.+Северная+сторона');"></div>
-                <div class="slide" style="background-image: url('https://placehold.jp/40/1a1a1a/ffffff/1080x1920.png?text=3.+Восточная+сторона');"></div>
-                <div class="slide" style="background-image: url('https://placehold.jp/40/2a2a2a/ffffff/1080x1920.png?text=4.+Южная+сторона');"></div>
-                <div class="slide" style="background-image: url('https://placehold.jp/40/1a1a1a/ffffff/1080x1920.png?text=5.+Западная+сторона');"></div>
-            </div>
-        </div>
-
-        <div class="content-panel" id="contentPanel">
-            <div class="drag-handle"></div>
-            <div class="content-scroll">
-                <h2 id="viewTitle">Загрузка...</h2>
-                <div class="dua-box">
-                    <p class="arabic">رَبَّنَا آتِنَا فِي الدُّنْيَا حَسَنَةً</p>
-                    <p class="translation">Текст дуа и порядок действий для текущего ракурса.</p>
-                </div>
-                <div class="fish-text">
-                    <p>Это описание стороны Каабы. При свайпе влево после 5-й стороны вы снова вернетесь к 1-й (Черному камню). Это создает эффект непрерывного обхода (Тавафа).</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    <script src="main.js"></script>
+  <main id="app">
+    <section id="visual"></section>
+    <section id="content">
+      <div id="text"></div>
+    </section>
+  </main>
+  <script src="main.js"></script>
 </body>
 </html>
-
