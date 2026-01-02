@@ -8,7 +8,7 @@ const images = [
 ];
 
 const contents = [
-  "🕋 **Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.",
+  "🕋 **Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisisРакурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisisРакурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.",
   "🧭 **Северная сторона** — Nulla vitae elit libero, a pharetra augue. Vivamus sagittis lacus vel augue laoreet.",
   "🌅 **Восточная сторона** — Cras mattis consectetur purus sit amet fermentum. Donec sed odio dui.",
   "🔥 **Южная сторона** — Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum.",
