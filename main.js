@@ -1,80 +1,74 @@
-const viewer = document.getElementById('viewer');
-const contentPanel = document.getElementById('contentPanel');
-const viewTitle = document.getElementById('viewTitle');
-const touchArea = document.getElementById('touchArea');
 
-const viewsData = [
-    "1. Черный камень",
-    "2. Северная сторона",
-    "3. Восточная сторона",
-    "4. Южная сторона",
-    "5. Западная сторона"
+const images = [
+  "https://source.unsplash.com/random/800x1600/?kaaba,blackstone",
+  "https://source.unsplash.com/random/800x1600/?kaaba,north",
+  "https://source.unsplash.com/random/800x1600/?kaaba,east",
+  "https://source.unsplash.com/random/800x1600/?kaaba,south",
+  "https://source.unsplash.com/random/800x1600/?kaaba,west"
 ];
 
-let currentIndex = 0;
-let startX = 0;
-let isAnimating = false;
+const contents = [
+  "🕋 **Ракурс с Чёрным камнем** — Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean facilisis.",
+  "🧭 **Северная сторона** — Nulla vitae elit libero, a pharetra augue. Vivamus sagittis lacus vel augue laoreet.",
+  "🌅 **Восточная сторона** — Cras mattis consectetur purus sit amet fermentum. Donec sed odio dui.",
+  "🔥 **Южная сторона** — Etiam porta sem malesuada magna mollis euismod. Maecenas faucibus mollis interdum.",
+  "🌇 **Западная сторона** — Sed posuere consectetur est at lobortis. Curabitur blandit tempus porttitor."
+];
 
-function changeView(direction) {
-    if (isAnimating) return;
-    isAnimating = true;
+let current = 0;
+const visual = document.getElementById("visual");
+const content = document.getElementById("content");
+const text = document.getElementById("text");
 
-    // 1. Прячем контент
-    contentPanel.classList.remove('active');
+function showImage(index, direction = "") {
+  visual.classList.remove("swipe-left", "swipe-right");
+  if (direction) visual.classList.add(direction);
 
-    // 2. Рассчитываем новый индекс (круговая логика)
-    if (direction === 'next') {
-        currentIndex = (currentIndex + 1) % viewsData.length;
-    } else if (direction === 'prev') {
-        currentIndex = (currentIndex - 1 + viewsData.length) % viewsData.length;
-    }
-    // Если просто инициализация (без направления), currentIndex остается 0
-
-    // 3. Листаем фон
-    setTimeout(() => {
-        viewer.style.transform = `translateX(-${currentIndex * 100}vw)`;
-        
-        // 4. Показываем контент с задержкой, чтобы пользователь увидел смену ракурса
-        setTimeout(() => {
-            viewTitle.innerText = viewsData[currentIndex];
-            contentPanel.classList.add('active');
-            
-            // Разблокируем анимацию чуть позже окончания выезда панели
-            setTimeout(() => { isAnimating = false; }, 1200);
-        }, 400); 
-    }, 100);
+  setTimeout(() => {
+    visual.style.backgroundImage = `url(${images[index]})`;
+    visual.classList.remove("swipe-left", "swipe-right");
+  }, 300);
 }
 
-// Слушатели событий
-touchArea.addEventListener('touchstart', (e) => {
-    startX = e.touches[0].clientX;
-}, {passive: true});
+function showContent(index) {
+  setTimeout(() => {
+    text.innerHTML = contents[index];
+    content.classList.add("active");
+  }, 1000);
+}
 
-touchArea.addEventListener('touchend', (e) => {
-    if (isAnimating) return;
-    let endX = e.changedTouches[0].clientX;
-    let diffX = startX - endX;
+function hideContent() {
+  content.classList.remove("active");
+}
 
-    if (Math.abs(diffX) > 60) {
-        if (diffX > 0) {
-            changeView('next');
-        } else {
-            changeView('prev');
-        }
+/* Initialize */
+showImage(current);
+showContent(current);
+
+/* Swipe logic */
+let startX = 0;
+let startY = 0;
+
+document.addEventListener("touchstart", (e) => {
+  startX = e.touches[0].clientX;
+  startY = e.touches[0].clientY;
+}, false);
+
+document.addEventListener("touchend", (e) => {
+  const dx = e.changedTouches[0].clientX - startX;
+  const dy = e.changedTouches[0].clientY - startY;
+
+  if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 30) {
+    hideContent();
+
+    if (dx < 0) { // swipe left → next
+      current = (current + 1) % images.length;
+      showImage(current, "swipe-left");
+    } else { // swipe right → previous
+      current = (current - 1 + images.length) % images.length;
+      showImage(current, "swipe-right");
     }
-}, {passive: true});
 
-// Для теста на ПК (мышкой)
-touchArea.addEventListener('mousedown', (e) => { startX = e.clientX; });
-touchArea.addEventListener('mouseup', (e) => {
-    let diffX = startX - e.clientX;
-    if (Math.abs(diffX) > 60) {
-        changeView(diffX > 0 ? 'next' : 'prev');
-    }
-});
-
-// Стартовый запуск
-window.onload = () => {
-    changeView('init');
-};
-
+    showContent(current);
+  }
+}, false);
