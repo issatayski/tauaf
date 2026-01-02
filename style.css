@@ -1,84 +1,91 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    -webkit-tap-highlight-color: transparent;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 html, body {
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    background: #000;
-    font-family: -apple-system, sans-serif;
+  height: 100%;
+  width: 100%;
+  font-family: "Noto Sans Arabic", sans-serif;
+  background-color: #000;
+  color: #fff;
+  overflow: hidden;
 }
 
+/* Main layout */
 #app {
-    position: relative;
-    width: 100%;
-    height: 100%;
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
 }
 
-.viewer-container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    touch-action: none;
+#visual {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-size: cover;
+  background-position: center;
+  transition: transform 0.7s ease-in-out, opacity 0.7s ease-in-out;
+  will-change: transform, opacity;
 }
 
-.viewer {
-    display: flex;
-    width: 500%;
-    height: 100%;
-    /* Плавность вращения самой Каабы */
-    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+#visual.swipe-left {
+  transform: translateX(-100%);
+  opacity: 0;
+}
+#visual.swipe-right {
+  transform: translateX(100%);
+  opacity: 0;
 }
 
-.slide {
-    width: 100vw;
-    height: 100%;
-    background-size: cover;
-    background-position: center;
+/* Content slide-up panel */
+#content {
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+  height: 0;
+  background: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
+  overflow-y: auto;
+  transition: height 0.6s ease, opacity 0.6s ease;
+  opacity: 0;
+  padding: 2rem 1rem;
 }
 
-.content-panel {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 66.6%;
-    background: white;
-    border-radius: 24px 24px 0 0;
-    transform: translateY(105%);
-    /* ЗАМЕДЛЕННАЯ СКОРОСТЬ ПОЯВЛЕНИЯ (1.2 секунды для плавности) */
-    transition: transform 1.2s cubic-bezier(0.19, 1, 0.22, 1);
-    z-index: 10;
+#content.active {
+  height: 66vh;
+  opacity: 1;
 }
 
-.content-panel.active {
-    transform: translateY(0);
+#text {
+  font-size: 1rem;
+  line-height: 1.6;
 }
 
-.drag-handle {
-    width: 40px;
-    height: 4px;
-    background: #e0e0e0;
-    border-radius: 2px;
-    margin: 15px auto;
+/* Scrollbar styling for content */
+#content::-webkit-scrollbar {
+  width: 5px;
+}
+#content::-webkit-scrollbar-thumb {
+  background: #777;
+  border-radius: 5px;
 }
 
-.content-scroll {
-    overflow-y: auto;
-    height: calc(100% - 40px);
-    padding: 0 24px 40px;
-    color: #2c2c2c;
+/* Small fade on top boundary */
+#content::before {
+  content: "";
+  position: absolute;
+  top: -20px;
+  width: 100%;
+  height: 20px;
+  background: linear-gradient(to bottom, rgba(0,0,0,0.8), transparent);
 }
 
-h2 { margin-bottom: 15px; color: #b08d57; font-size: 1.4rem; }
-.dua-box { background: #fdfaf5; padding: 15px; border-radius: 12px; margin: 15px 0; border: 1px solid #f0e6d2; }
-.arabic { font-size: 1.6rem; text-align: right; margin-bottom: 8px; }
-.translation { font-size: 0.95rem; color: #555; line-height: 1.5; }
-
+/* Mobile adjustments */
+@media (min-width: 768px) {
+  #text { font-size: 1.1rem; }
+}
