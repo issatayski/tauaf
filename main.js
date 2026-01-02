@@ -1,10 +1,10 @@
 
 const images = [
-  "https://source.unsplash.com/random/800x1600/?kaaba,blackstone",
-  "https://source.unsplash.com/random/800x1600/?kaaba,north",
-  "https://source.unsplash.com/random/800x1600/?kaaba,east",
-  "https://source.unsplash.com/random/800x1600/?kaaba,south",
-  "https://source.unsplash.com/random/800x1600/?kaaba,west"
+  "img/1.jpg",
+  "img/2.jpg",
+  "img/3.jpg",
+  "img/4.jpg",
+  "img/5.jpg"
 ];
 
 const contents = [
