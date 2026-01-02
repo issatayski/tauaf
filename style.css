@@ -1,77 +1,120 @@
+:root {
+    --panel-height: 66.66vh;
+    --transition-speed: 0.6s;
+}
+
 * {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
 }
 
-html, body {
-  height: 100%;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  background: #000;
-  overflow: hidden;
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: #000;
+    color: #fff;
+    overflow: hidden; /* Запрет системного скролла */
+    height: 100vh;
+    width: 100vw;
 }
 
-/* Основной контейнер */
 #app {
-  position: relative;
-  width: 100%;
-  height: 100vh;
+    position: relative;
+    width: 100%;
+    height: 100%;
 }
 
-/* Сцена с фоном */
-.scene {
-  position: absolute;
-  inset: 0;
-  overflow: hidden;
+/* Блок визуализации */
+.viewer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    transition: transform var(--transition-speed) cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 .slide {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  opacity: 0;
-  transform: translateX(0);
-  transition: opacity 0.6s ease, transform 0.6s ease;
+    min-width: 100vw;
+    height: 100vh;
+    background-size: cover;
+    background-position: center;
+    position: relative;
 }
 
-.slide.active {
-  opacity: 1;
-  z-index: 2;
+.overlay-label {
+    position: absolute;
+    top: 40px;
+    left: 20px;
+    background: rgba(0,0,0,0.5);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    backdrop-filter: blur(5px);
 }
 
-/* Контент */
-.content {
-  position: absolute;
-  bottom: 0;
-  width: 100%;
-  height: 66vh;
-  background: rgba(0,0,0,0.75);
-  color: #fff;
-  backdrop-filter: blur(6px);
-  transform: translateY(100%);
-  transition: transform 0.5s ease, opacity 0.5s ease;
-  opacity: 0;
+/* Контентная панель */
+.content-panel {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: var(--panel-height);
+    background: white;
+    color: #1a1a1a;
+    border-top-left-radius: 24px;
+    border-top-right-radius: 24px;
+    transform: translateY(100%);
+    transition: transform var(--transition-speed) ease-out;
+    z-index: 10;
+    box-shadow: 0 -10px 30px rgba(0,0,0,0.3);
 }
 
-.content.visible {
-  transform: translateY(0);
-  opacity: 1;
+.content-panel.visible {
+    transform: translateY(0);
+}
+
+.drag-handle {
+    width: 40px;
+    height: 4px;
+    background: #ddd;
+    border-radius: 2px;
+    margin: 12px auto;
 }
 
 .content-inner {
-  height: 100%;
-  padding: 20px;
-  overflow-y: auto;
+    padding: 0 24px 40px;
+    height: calc(100% - 30px);
+    overflow-y: auto;
 }
 
-.content h2 {
-  margin-bottom: 12px;
-  font-size: 20px;
+h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    color: #b08d57;
 }
 
-.content p {
-  line-height: 1.6;
-  font-size: 15px;
-  margin-bottom: 12px;
+.arabic {
+    font-size: 1.8rem;
+    direction: rtl;
+    text-align: center;
+    margin-bottom: 15px;
+    line-height: 1.4;
+    color: #222;
 }
+
+.translation {
+    font-style: italic;
+    color: #666;
+    border-left: 3px solid #b08d57;
+    padding-left: 15px;
+    margin-bottom: 20px;
+}
+
+.description {
+    line-height: 1.6;
+    color: #444;
+}
+
