@@ -2,57 +2,41 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Kaaba Viewer (Demo)</title>
-
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Umrah Guide – Kaaba View</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Верх: просмотр Каабы -->
-  <section class="viewer" id="viewer">
-    <div class="viewer-images">
-      <div class="view active" data-view="1" style="background-image:url('https://picsum.photos/id/1015/900/1600')"></div>
-      <div class="view" data-view="2" style="background-image:url('https://picsum.photos/id/1016/900/1600')"></div>
-      <div class="view" data-view="3" style="background-image:url('https://picsum.photos/id/1018/900/1600')"></div>
-      <div class="view" data-view="4" style="background-image:url('https://picsum.photos/id/1020/900/1600')"></div>
-      <div class="view" data-view="5" style="background-image:url('https://picsum.photos/id/1024/900/1600')"></div>
+<div id="app">
+  <!-- Фоновые изображения -->
+  <div class="scene">
+    <div class="slide active" style="background-image:url('https://picsum.photos/800/1400?1')"></div>
+    <div class="slide" style="background-image:url('https://picsum.photos/800/1400?2')"></div>
+    <div class="slide" style="background-image:url('https://picsum.photos/800/1400?3')"></div>
+    <div class="slide" style="background-image:url('https://picsum.photos/800/1400?4')"></div>
+    <div class="slide" style="background-image:url('https://picsum.photos/800/1400?5')"></div>
+  </div>
+
+  <!-- Контентная область -->
+  <div class="content hidden">
+    <div class="content-inner">
+      <h2 id="content-title">Чёрный камень</h2>
+      <p id="content-text">
+        Рыбный текст для описания действий и дуа.  
+        Здесь будет краткая, но содержательная информация,
+        привязанная строго к текущему ракурсу Каабы.
+      </p>
+      <p>
+        Дополнительный текст для проверки прокрутки внутри
+        контентной области. Lorem ipsum dolor sit amet,
+        consectetur adipiscing elit. Pellentesque habitant
+        morbi tristique senectus et netus.
+      </p>
     </div>
-  </section>
+  </div>
+</div>
 
-  <!-- Низ: контент -->
-  <section class="content">
-    <article class="content-item active" data-content="1">
-      <h2>Чёрный камень</h2>
-      <p>Рыбный текст. Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-      <p>Дуа: Lorem ipsum dolor sit amet, sed do eiusmod tempor.</p>
-    </article>
-
-    <article class="content-item" data-content="2">
-      <h2>Северная сторона</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation.</p>
-    </article>
-
-    <article class="content-item" data-content="3">
-      <h2>Задняя сторона</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-      <p>Duis aute irure dolor in reprehenderit.</p>
-    </article>
-
-    <article class="content-item" data-content="4">
-      <h2>Южная сторона</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-      <p>Excepteur sint occaecat cupidatat non proident.</p>
-    </article>
-
-    <article class="content-item" data-content="5">
-      <h2>Восточная сторона</h2>
-      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-      <p>Sunt in culpa qui officia deserunt mollit anim.</p>
-    </article>
-  </section>
-
-  <script src="main.js"></script>
+<script src="main.js"></script>
 </body>
 </html>
