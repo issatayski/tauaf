@@ -316,73 +316,116 @@ body::after {
 /* ====== КНОПКИ УПРАВЛЕНИЯ ====== */
 .controls {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
 }
 
+/* Базовая вторичная кнопка (контурная) */
 .btn {
-  background: transparent;
-  border: 1px solid var(--gold-dim);
-  color: var(--gold);
+  background: rgba(20, 17, 12, 0.6);
+  border: 1px solid var(--gold);
+  color: var(--gold-bright);
   padding: 10px 22px;
   font-family: 'Manrope', sans-serif;
   font-size: 12px;
   letter-spacing: 0.25em;
   text-transform: uppercase;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: background 0.25s ease, border-color 0.25s ease,
+              color 0.25s ease, box-shadow 0.25s ease, transform 0.15s ease;
   font-weight: 500;
   display: inline-flex;
   align-items: center;
   gap: 8px;
   white-space: nowrap;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
+.btn svg { transition: fill 0.25s ease; }
+
+/* Hover — мягкая золотая подсветка, текст ярче */
 .btn:hover:not(:disabled) {
-  background: rgba(212, 175, 106, 0.1);
-  border-color: var(--gold);
+  background: rgba(212, 175, 106, 0.15);
+  border-color: var(--gold-bright);
   color: var(--gold-bright);
-  box-shadow: 0 0 20px rgba(212, 175, 106, 0.2);
+  box-shadow: 0 0 18px rgba(212, 175, 106, 0.25);
+}
+
+/* Focus (после нажатия, навигация с клавиатуры) — кольцо вокруг, текст остаётся ярким */
+.btn:focus-visible {
+  border-color: var(--gold-bright);
+  color: var(--gold-bright);
+  box-shadow: 0 0 0 2px rgba(244, 216, 150, 0.35),
+              0 0 20px rgba(212, 175, 106, 0.3);
+}
+
+/* Active — момент клика: лёгкое вдавливание, текст НЕ исчезает */
+.btn:active:not(:disabled) {
+  background: rgba(212, 175, 106, 0.25);
+  color: var(--bg);
+  transform: scale(0.97);
 }
 
 .btn:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
+  border-color: var(--gold-dim);
+  color: var(--gold-dim);
+  background: rgba(20, 17, 12, 0.4);
 }
 
+/* Первичная (Play) — заливная золотая, тёмный текст */
 .btn-primary {
   background: linear-gradient(180deg, var(--gold-bright), var(--gold));
   color: var(--bg);
   border-color: var(--gold-bright);
-  min-width: 120px;
+  min-width: 130px;
   justify-content: center;
+  font-weight: 600;
 }
+
+.btn-primary svg { fill: var(--bg); }
 
 .btn-primary:hover:not(:disabled) {
+  background: linear-gradient(180deg, #ffe5a8, var(--gold-bright));
   color: var(--bg);
-  box-shadow: 0 0 30px rgba(244, 216, 150, 0.4);
+  box-shadow: 0 0 26px rgba(244, 216, 150, 0.45);
 }
 
-/* Иконочные кнопки навигации */
+.btn-primary:focus-visible {
+  color: var(--bg);
+  box-shadow: 0 0 0 2px rgba(244, 216, 150, 0.6),
+              0 0 26px rgba(244, 216, 150, 0.45);
+}
+
+.btn-primary:active:not(:disabled) {
+  background: var(--gold);
+  color: var(--bg);
+  transform: scale(0.97);
+}
+
+.btn-primary:disabled {
+  background: rgba(212, 175, 106, 0.3);
+  color: rgba(7, 6, 10, 0.5);
+  border-color: rgba(212, 175, 106, 0.4);
+}
+
+/* Иконочные круглые кнопки */
 .btn-icon {
-  width: 44px;
-  height: 44px;
+  width: 46px;
+  height: 46px;
   padding: 0;
   border-radius: 50%;
   justify-content: center;
 }
 
 .btn-icon svg {
-  width: 16px;
-  height: 16px;
+  width: 18px;
+  height: 18px;
   fill: currentColor;
-}
-
-.btn-reset {
-  font-size: 10px;
-  padding: 8px 16px;
 }
 
 /* ====== АДАПТИВ ====== */
@@ -683,7 +726,6 @@ body::after {
         </svg>
       </button>
 
-      <button class="btn btn-reset" id="resetBtn">Сначала</button>
     </div>
 
   </div>
@@ -768,7 +810,6 @@ const playLabel = document.getElementById('playLabel');
 const playIcon = document.getElementById('playIcon');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
-const resetBtn = document.getElementById('resetBtn');
 const stageInfo = document.getElementById('stageInfo');
 const stageDay = document.getElementById('stageDay');
 const stageName = document.getElementById('stageName');
@@ -1047,17 +1088,12 @@ function goPrev() {
   setState(currentStep - 1);
 }
 
-function goReset() {
-  setState(0);
-}
-
 /* ============================================================
    ОБРАБОТЧИКИ
    ============================================================ */
 playBtn.addEventListener('click', play);
 prevBtn.addEventListener('click', goPrev);
 nextBtn.addEventListener('click', goNext);
-resetBtn.addEventListener('click', goReset);
 
 // Клик по точкам прогресса — переход к нужному этапу
 progressDots.forEach((dot, i) => {
