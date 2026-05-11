@@ -726,6 +726,12 @@ body::after {
         </svg>
       </button>
 
+      <button class="btn btn-icon" id="resetBtn" aria-label="Сначала" title="Сначала">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/>
+        </svg>
+      </button>
+
     </div>
 
   </div>
@@ -810,6 +816,7 @@ const playLabel = document.getElementById('playLabel');
 const playIcon = document.getElementById('playIcon');
 const prevBtn = document.getElementById('prevBtn');
 const nextBtn = document.getElementById('nextBtn');
+const resetBtn = document.getElementById('resetBtn');
 const stageInfo = document.getElementById('stageInfo');
 const stageDay = document.getElementById('stageDay');
 const stageName = document.getElementById('stageName');
@@ -1094,6 +1101,7 @@ function goPrev() {
 playBtn.addEventListener('click', play);
 prevBtn.addEventListener('click', goPrev);
 nextBtn.addEventListener('click', goNext);
+resetBtn.addEventListener('click', () => setState(0));
 
 // Клик по точкам прогресса — переход к нужному этапу
 progressDots.forEach((dot, i) => {
