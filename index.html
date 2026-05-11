@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Маршрут Хаджа — Анимация</title>
+
+<!-- GSAP с плагином MotionPath: ~50КБ gzip -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/MotionPathPlugin.min.js"></script>
+
+<!-- Шрифты: Cormorant для заголовков, Inter — нет, берём Manrope для UI (характерный, не банальный) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600&family=Manrope:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --gold: #d4af6a;
+  --gold-bright: #f4d896;
+  --gold-dim: #8a6f3f;
+  --bg: #07060a;
+  --bg-soft: #14110c;
+  --text: #e8dfc9;
+  --text-dim: #8a8478;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Manrope', sans-serif;
+  font-weight: 300;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+/* Фоновая текстура «ночной город сверху» через градиенты */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(ellipse at 20% 30%, rgba(212, 175, 106, 0.06), transparent 50%),
+    radial-gradient(ellipse at 80% 70%, rgba(212, 175, 106, 0.04), transparent 50%),
+    radial-gradient(circle at 50% 50%, transparent 0%, var(--bg) 80%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Зернистость поверх фона */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3CfeColorMatrix values='0 0 0 0 0.83 0 0 0 0 0.69 0 0 0 0 0.42 0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: overlay;
+}
+
+.page {
+  position: relative;
+  z-index: 2;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 60px 24px 100px;
+}
+
+/* Заголовок */
+.header {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.kicker {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  margin-bottom: 12px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* Контейнер карты с псевдо-3D наклоном */
+.map-wrap {
+  position: relative;
+  perspective: 2000px;
+  margin: 40px auto;
+  max-width: 900px;
+}
+
+.map-stage {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  transform: rotateX(8deg);
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.map-wrap:hover .map-stage {
+  transform: rotateX(2deg) rotateY(-2deg);
+}
+
+/* SVG карты */
+.map-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+  filter: drop-shadow(0 20px 60px rgba(212, 175, 106, 0.15));
+}
+
+/* Подложка-фон карты с шумом и виньеткой */
+.map-bg {
+  fill: url(#cityTexture);
+}
+
+/* Линии маршрута (по умолчанию приглушённые) */
+.route-line {
+  fill: none;
+  stroke: rgba(212, 175, 106, 0.18);
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Активный (анимированный) сегмент линии */
+.route-active {
+  fill: none;
+  stroke: var(--gold-bright);
+  stroke-width: 3;
+  stroke-linecap: round;
+  filter: drop-shadow(0 0 8px var(--gold)) drop-shadow(0 0 16px rgba(212, 175, 106, 0.5));
+}
+
+/* Точки локаций */
+.point-circle {
+  fill: var(--bg);
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  transition: all 0.3s ease;
+}
+
+.point-circle.active {
+  fill: var(--gold);
+  stroke: var(--gold-bright);
+  stroke-width: 2;
+  filter: drop-shadow(0 0 12px var(--gold-bright));
+}
+
+.point-pulse {
+  fill: none;
+  stroke: var(--gold);
+  stroke-width: 1.5;
+  opacity: 0;
+}
+
+/* Лейблы локаций */
+.point-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  font-weight: 500;
+  fill: var(--text);
+  letter-spacing: 0.05em;
+  pointer-events: none;
+}
+
+.point-label-bg {
+  fill: rgba(7, 6, 10, 0.85);
+  stroke: rgba(212, 175, 106, 0.3);
+  stroke-width: 1;
+  rx: 4;
+}
+
+/* Лейблы расстояний */
+.distance-label {
+  font-family: 'Manrope', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  fill: var(--gold);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+/* Иконка паломника */
+.pilgrim {
+  filter: drop-shadow(0 0 8px var(--gold-bright)) drop-shadow(0 0 20px var(--gold));
+}
+
+/* Контролы */
+.controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  margin-top: 40px;
+}
+
+.btn {
+  background: transparent;
+  border: 1px solid var(--gold-dim);
+  color: var(--gold);
+  padding: 12px 28px;
+  font-family: 'Manrope', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 500;
+}
+
+.btn:hover {
+  background: rgba(212, 175, 106, 0.1);
+  border-color: var(--gold);
+  color: var(--gold-bright);
+  box-shadow: 0 0 20px rgba(212, 175, 106, 0.2);
+}
+
+.btn-primary {
+  background: linear-gradient(180deg, var(--gold-bright), var(--gold));
+  color: var(--bg);
+  border-color: var(--gold-bright);
+}
+
+.btn-primary:hover {
+  color: var(--bg);
+  box-shadow: 0 0 30px rgba(244, 216, 150, 0.4);
+}
+
+/* Информация об этапе */
+.stage-info {
+  margin-top: 32px;
+  text-align: center;
+  min-height: 80px;
+}
+
+.stage-day {
+  font-size: 11px;
+  letter-spacing: 0.4em;
+  color: var(--gold);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+  font-weight: 500;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s ease;
+}
+
+.stage-name {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 28px;
+  color: var(--text);
+  margin-bottom: 8px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s ease 0.1s;
+}
+
+.stage-desc {
+  font-size: 14px;
+  color: var(--text-dim);
+  max-width: 540px;
+  margin: 0 auto;
+  line-height: 1.7;
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.5s ease 0.2s;
+}
+
+.stage-info.visible .stage-day,
+.stage-info.visible .stage-name,
+.stage-info.visible .stage-desc {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Прогресс-бар */
+.progress {
+  width: 100%;
+  max-width: 600px;
+  margin: 24px auto 0;
+  height: 1px;
+  background: rgba(212, 175, 106, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.progress-fill {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+  width: 0%;
+  box-shadow: 0 0 8px var(--gold);
+}
+
+/* Адаптив */
+@media (max-width: 640px) {
+  .page { padding: 32px 16px 60px; }
+  .map-stage { transform: rotateX(4deg); }
+  .point-label { font-size: 13px; }
+  .distance-label { font-size: 9px; }
+  .controls { flex-direction: column; width: 100%; }
+  .btn { width: 100%; }
+}
+
+/* Уважаем пользователей с reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .map-stage { transform: none; transition: none; }
+  .map-wrap:hover .map-stage { transform: none; }
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <header class="header">
+    <div class="kicker">Священный путь</div>
+    <h1 class="title">Маршрут Хаджа</h1>
+    <p class="subtitle">Пять дней. Пять священных мест. Один из величайших духовных путей в истории человечества.</p>
+  </header>
+
+  <div class="map-wrap">
+    <div class="map-stage">
+      <svg class="map-svg" viewBox="0 0 800 1000" preserveAspectRatio="xMidYMid meet">
+
+        <defs>
+          <!-- Текстура «ночного города» -->
+          <radialGradient id="cityTexture" cx="50%" cy="50%" r="70%">
+            <stop offset="0%" stop-color="#1a1410" />
+            <stop offset="60%" stop-color="#0d0a07" />
+            <stop offset="100%" stop-color="#050405" />
+          </radialGradient>
+
+          <!-- Свечение точек -->
+          <radialGradient id="pointGlow">
+            <stop offset="0%" stop-color="#f4d896" stop-opacity="0.6" />
+            <stop offset="100%" stop-color="#f4d896" stop-opacity="0" />
+          </radialGradient>
+
+          <!-- Маркер-стрелка для направления маршрута -->
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5"
+                  markerWidth="6" markerHeight="6" orient="auto">
+            <path d="M 0 0 L 10 5 L 0 10 z" fill="#d4af6a" opacity="0.6"/>
+          </marker>
+        </defs>
+
+        <!-- Фон-подложка с городской текстурой -->
+        <rect class="map-bg" width="800" height="1000" />
+
+        <!-- Декоративные «огни города» -->
+        <g opacity="0.4">
+          <circle cx="120" cy="200" r="0.8" fill="#d4af6a" opacity="0.6"/>
+          <circle cx="180" cy="350" r="0.6" fill="#d4af6a" opacity="0.4"/>
+          <circle cx="250" cy="180" r="1" fill="#d4af6a" opacity="0.8"/>
+          <circle cx="320" cy="450" r="0.5" fill="#d4af6a" opacity="0.5"/>
+          <circle cx="500" cy="220" r="0.7" fill="#d4af6a" opacity="0.6"/>
+          <circle cx="600" cy="380" r="0.5" fill="#d4af6a" opacity="0.4"/>
+          <circle cx="450" cy="600" r="0.6" fill="#d4af6a" opacity="0.5"/>
+          <circle cx="700" cy="500" r="0.8" fill="#d4af6a" opacity="0.7"/>
+          <circle cx="150" cy="700" r="0.5" fill="#d4af6a" opacity="0.4"/>
+          <circle cx="280" cy="850" r="0.6" fill="#d4af6a" opacity="0.5"/>
+          <circle cx="550" cy="800" r="0.7" fill="#d4af6a" opacity="0.6"/>
+          <circle cx="680" cy="700" r="0.5" fill="#d4af6a" opacity="0.4"/>
+        </g>
+
+        <!--
+          Маршрут (по реальной географии Мекки):
+          - Аль-Харам (Кааба):    запад/юг
+          - Мина:                 северо-восток от Каабы
+          - Джамарат:             в Мине, ближе к Мекке
+          - Муздалифа:            юго-восток, между Миной и Арафатом
+          - Арафат:               юго-восток, дальше всех
+
+          Точки расставлены примерно по реальной географии (сжато для композиции)
+        -->
+
+        <!-- Приглушённые линии всего маршрута (фон) -->
+        <path id="bg-route"
+              class="route-line"
+              d="M 180 700
+                 Q 250 550, 380 380
+                 L 380 380
+                 Q 430 410, 450 440
+                 Q 500 480, 600 520
+                 Q 680 600, 620 700
+                 L 620 700
+                 Q 530 660, 450 600
+                 Q 410 540, 420 460" />
+
+        <!-- АКТИВНЫЕ сегменты маршрута (анимируются) -->
+        <!-- Сегмент 1: Аль-Харам → Мина (7 км) -->
+        <path id="seg-1"
+              class="route-active"
+              d="M 180 700 Q 250 550, 380 380"
+              stroke-dasharray="1000"
+              stroke-dashoffset="1000" />
+
+        <!-- Сегмент 2: Мина → Арафат (14 км) -->
+        <path id="seg-2"
+              class="route-active"
+              d="M 380 380 Q 500 380, 620 480"
+              stroke-dasharray="1000"
+              stroke-dashoffset="1000" />
+
+        <!-- Сегмент 3: Арафат → Муздалифа (9 км) -->
+        <path id="seg-3"
+              class="route-active"
+              d="M 620 480 Q 600 600, 510 660"
+              stroke-dasharray="1000"
+              stroke-dashoffset="1000" />
+
+        <!-- Сегмент 4: Муздалифа → Джамарат → Мина (5-6 км) -->
+        <path id="seg-4"
+              class="route-active"
+              d="M 510 660 Q 460 580, 430 470 L 410 410"
+              stroke-dasharray="1000"
+              stroke-dashoffset="1000" />
+
+        <!-- Сегмент 5: Возврат в Аль-Харам (Тавваф) -->
+        <path id="seg-5"
+              class="route-active"
+              d="M 410 410 Q 290 530, 180 700"
+              stroke-dasharray="1000"
+              stroke-dashoffset="1000" />
+
+        <!-- Лейблы расстояний -->
+        <g class="distance-labels">
+          <text class="distance-label" x="220" y="540" transform="rotate(-50, 220, 540)">7 КМ</text>
+          <text class="distance-label" x="490" y="370">14 КМ</text>
+          <text class="distance-label" x="640" y="600" transform="rotate(70, 640, 600)">9 КМ</text>
+          <text class="distance-label" x="430" y="560" transform="rotate(75, 430, 560)">6 КМ</text>
+        </g>
+
+        <!-- ТОЧКИ (от Каабы по часовой) -->
+
+        <!-- 1. Аль-Харам -->
+        <g class="location" data-id="haram" transform="translate(180, 700)">
+          <circle class="point-pulse" r="40" />
+          <circle class="point-pulse" r="40" />
+          <circle cx="0" cy="0" r="35" fill="url(#pointGlow)" />
+          <circle class="point-circle" r="14" />
+          <!-- символ Каабы -->
+          <rect x="-5" y="-5" width="10" height="10" fill="var(--gold)" />
+          <text class="point-label" x="0" y="55" text-anchor="middle">Аль-Харам</text>
+          <text class="point-label" x="0" y="73" text-anchor="middle" style="font-size:11px; fill: var(--text-dim); letter-spacing: 0.2em;">КААБА</text>
+        </g>
+
+        <!-- 2. Мина -->
+        <g class="location" data-id="mina" transform="translate(380, 380)">
+          <circle class="point-pulse" r="40" />
+          <circle class="point-pulse" r="40" />
+          <circle cx="0" cy="0" r="35" fill="url(#pointGlow)" />
+          <circle class="point-circle" r="14" />
+          <!-- символ палатки -->
+          <path d="M -6 4 L 0 -6 L 6 4 Z" fill="none" stroke="var(--gold)" stroke-width="1.5" />
+          <text class="point-label" x="0" y="-30" text-anchor="middle">Мина</text>
+          <text class="point-label" x="0" y="-48" text-anchor="middle" style="font-size:11px; fill: var(--text-dim); letter-spacing: 0.2em;">ПАЛАТОЧНЫЙ ГОРОД</text>
+        </g>
+
+        <!-- 3. Джамарат -->
+        <g class="location" data-id="jamarat" transform="translate(420, 460)">
+          <circle class="point-pulse" r="32" />
+          <circle cx="0" cy="0" r="28" fill="url(#pointGlow)" />
+          <circle class="point-circle" r="10" />
+          <!-- символ столба -->
+          <rect x="-1.5" y="-5" width="3" height="10" fill="var(--gold)" />
+          <text class="point-label" x="22" y="4" style="font-size: 13px;">Джамарат</text>
+        </g>
+
+        <!-- 4. Арафат -->
+        <g class="location" data-id="arafat" transform="translate(620, 480)">
+          <circle class="point-pulse" r="40" />
+          <circle class="point-pulse" r="40" />
+          <circle cx="0" cy="0" r="35" fill="url(#pointGlow)" />
+          <circle class="point-circle" r="14" />
+          <!-- символ горы -->
+          <path d="M -6 4 L -2 -3 L 1 0 L 4 -5 L 6 4 Z" fill="var(--gold)" />
+          <text class="point-label" x="30" y="4">Арафат</text>
+          <text class="point-label" x="30" y="22" style="font-size:11px; fill: var(--text-dim); letter-spacing: 0.2em;">ГОРА РАХМА</text>
+        </g>
+
+        <!-- 5. Муздалифа -->
+        <g class="location" data-id="muzdalifa" transform="translate(510, 660)">
+          <circle class="point-pulse" r="40" />
+          <circle class="point-pulse" r="40" />
+          <circle cx="0" cy="0" r="35" fill="url(#pointGlow)" />
+          <circle class="point-circle" r="14" />
+          <!-- полумесяц -->
+          <path d="M -2 -5 A 5 5 0 1 0 -2 5 A 4 4 0 1 1 -2 -5 Z" fill="var(--gold)" />
+          <text class="point-label" x="0" y="40" text-anchor="middle">Муздалифа</text>
+          <text class="point-label" x="0" y="58" text-anchor="middle" style="font-size:11px; fill: var(--text-dim); letter-spacing: 0.2em;">ОТКРЫТАЯ РАВНИНА</text>
+        </g>
+
+        <!-- Иконка паломника (анимируется по маршруту) -->
+        <g id="pilgrim" class="pilgrim" opacity="0">
+          <circle r="6" fill="var(--gold-bright)" />
+          <circle r="12" fill="none" stroke="var(--gold-bright)" stroke-width="0.5" opacity="0.5" />
+          <circle r="20" fill="none" stroke="var(--gold)" stroke-width="0.3" opacity="0.3" />
+        </g>
+
+      </svg>
+    </div>
+  </div>
+
+  <!-- Информация о текущем этапе -->
+  <div class="stage-info" id="stageInfo">
+    <div class="stage-day" id="stageDay">Готов начать путь</div>
+    <div class="stage-name" id="stageName">Священная Мекка</div>
+    <div class="stage-desc" id="stageDesc">Нажмите кнопку, чтобы пройти весь путь паломничества — от мечети Аль-Харам через Мину, Арафат и Муздалифу обратно к Каабе.</div>
+  </div>
+
+  <div class="progress">
+    <div class="progress-fill" id="progressFill"></div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="playBtn">Начать путь</button>
+    <button class="btn" id="resetBtn">Сначала</button>
+  </div>
+
+</div>
+
+<script>
+gsap.registerPlugin(MotionPathPlugin);
+
+// Данные о каждом этапе пути
+const stages = [
+  {
+    seg: '#seg-1',
+    point: 'haram',
+    nextPoint: 'mina',
+    day: 'День 1 · 8 Зуль-хиджа',
+    name: 'Мекка → Мина',
+    desc: 'Паломник входит в состояние ихрама и направляется из Священной мечети в палаточный город Мина, где проводит первую ночь в молитве.',
+    duration: 3
+  },
+  {
+    seg: '#seg-2',
+    point: 'mina',
+    nextPoint: 'arafat',
+    day: 'День 2 · 9 Зуль-хиджа',
+    name: 'Мина → Арафат',
+    desc: 'Главный день Хаджа. Паломники собираются у горы Рахма для вукуфа — стояния перед Всевышним с полудня до заката.',
+    duration: 3.5
+  },
+  {
+    seg: '#seg-3',
+    point: 'arafat',
+    nextPoint: 'muzdalifa',
+    day: 'Ночь 9 Зуль-хиджа',
+    name: 'Арафат → Муздалифа',
+    desc: 'После заката паломники идут в Муздалифу, чтобы провести ночь под открытым небом и собрать камешки для следующего дня.',
+    duration: 3
+  },
+  {
+    seg: '#seg-4',
+    point: 'muzdalifa',
+    nextPoint: 'mina',
+    day: 'День 3 · 10 Зуль-хиджа',
+    name: 'Муздалифа → Джамарат → Мина',
+    desc: 'Паломники возвращаются в Мину, символически побивают камнями столбы Джамарат, совершают курбан и снимают ихрам.',
+    duration: 3
+  },
+  {
+    seg: '#seg-5',
+    point: 'mina',
+    nextPoint: 'haram',
+    day: 'Финал · Прощальный Тавваф',
+    name: 'Возвращение к Каабе',
+    desc: 'Завершающий обход вокруг Каабы — Тавваф аль-Вида. Паломник прощается со священным домом, и Хадж считается завершённым.',
+    duration: 3.5
+  }
+];
+
+const playBtn = document.getElementById('playBtn');
+const resetBtn = document.getElementById('resetBtn');
+const stageInfo = document.getElementById('stageInfo');
+const stageDay = document.getElementById('stageDay');
+const stageName = document.getElementById('stageName');
+const stageDesc = document.getElementById('stageDesc');
+const progressFill = document.getElementById('progressFill');
+const pilgrim = document.getElementById('pilgrim');
+
+let masterTl = null;
+let isPlaying = false;
+
+function setStageInfo(stage) {
+  stageInfo.classList.remove('visible');
+  setTimeout(() => {
+    stageDay.textContent = stage.day;
+    stageName.textContent = stage.name;
+    stageDesc.textContent = stage.desc;
+    stageInfo.classList.add('visible');
+  }, 300);
+}
+
+function activatePoint(id, active = true) {
+  const el = document.querySelector(`.location[data-id="${id}"] .point-circle`);
+  if (!el) return;
+  if (active) el.classList.add('active');
+  else el.classList.remove('active');
+}
+
+function pulsePoint(id) {
+  const pulses = document.querySelectorAll(`.location[data-id="${id}"] .point-pulse`);
+  pulses.forEach((p, i) => {
+    gsap.fromTo(p,
+      { attr: { r: 14 }, opacity: 0.6 },
+      {
+        attr: { r: 50 },
+        opacity: 0,
+        duration: 1.5,
+        delay: i * 0.5,
+        ease: 'power2.out',
+        repeat: -1
+      }
+    );
+  });
+}
+
+function stopPulse(id) {
+  const pulses = document.querySelectorAll(`.location[data-id="${id}"] .point-pulse`);
+  pulses.forEach(p => {
+    gsap.killTweensOf(p);
+    gsap.set(p, { opacity: 0 });
+  });
+}
+
+function reset() {
+  if (masterTl) masterTl.kill();
+  isPlaying = false;
+  playBtn.textContent = 'Начать путь';
+
+  // Сброс линий
+  ['#seg-1', '#seg-2', '#seg-3', '#seg-4', '#seg-5'].forEach(s => {
+    gsap.set(s, { strokeDashoffset: 1000 });
+  });
+
+  // Сброс точек
+  ['haram', 'mina', 'arafat', 'muzdalifa', 'jamarat'].forEach(id => {
+    activatePoint(id, false);
+    stopPulse(id);
+  });
+
+  // Сброс паломника
+  gsap.set(pilgrim, { opacity: 0, x: 0, y: 0 });
+
+  // Сброс прогресса
+  gsap.set(progressFill, { width: '0%' });
+
+  setStageInfo({
+    day: 'Готов начать путь',
+    name: 'Священная Мекка',
+    desc: 'Нажмите кнопку, чтобы пройти весь путь паломничества — от мечети Аль-Харам через Мину, Арафат и Муздалифу обратно к Каабе.'
+  });
+}
+
+function play() {
+  if (isPlaying) {
+    masterTl.pause();
+    playBtn.textContent = 'Продолжить';
+    isPlaying = false;
+    return;
+  }
+
+  if (masterTl && masterTl.progress() > 0 && masterTl.progress() < 1) {
+    masterTl.play();
+    playBtn.textContent = 'Пауза';
+    isPlaying = true;
+    return;
+  }
+
+  reset();
+  isPlaying = true;
+  playBtn.textContent = 'Пауза';
+
+  masterTl = gsap.timeline({
+    onComplete: () => {
+      isPlaying = false;
+      playBtn.textContent = 'Пройти ещё раз';
+      gsap.to(pilgrim, { opacity: 0, duration: 1 });
+    }
+  });
+
+  // Стартовая точка — Аль-Харам
+  activatePoint('haram');
+  pulsePoint('haram');
+  gsap.set(pilgrim, { opacity: 1, x: 180, y: 700 });
+
+  stages.forEach((stage, i) => {
+    const segLen = i === 1 ? 600 : i === 4 ? 700 : 500;
+
+    masterTl
+      // Запуск этапа: показать инфо
+      .call(() => {
+        setStageInfo(stage);
+        stopPulse(stage.point);
+      })
+      // Анимация рисования линии
+      .to(stage.seg, {
+        strokeDashoffset: 0,
+        duration: stage.duration,
+        ease: 'power1.inOut'
+      }, '<')
+      // Движение паломника по этому пути
+      .to(pilgrim, {
+        motionPath: {
+          path: stage.seg,
+          align: stage.seg,
+          alignOrigin: [0.5, 0.5],
+          autoRotate: false
+        },
+        duration: stage.duration,
+        ease: 'power1.inOut'
+      }, '<')
+      // Прогресс-бар
+      .to(progressFill, {
+        width: `${((i + 1) / stages.length) * 100}%`,
+        duration: stage.duration,
+        ease: 'power1.inOut'
+      }, '<')
+      // По прибытии — активация точки
+      .call(() => {
+        activatePoint(stage.nextPoint);
+        pulsePoint(stage.nextPoint);
+        // Если по пути проходим Джамарат — подсвечиваем
+        if (stage.nextPoint === 'mina' && i === 3) {
+          activatePoint('jamarat');
+          pulsePoint('jamarat');
+        }
+      })
+      // Пауза для созерцания
+      .to({}, { duration: 0.8 });
+  });
+}
+
+playBtn.addEventListener('click', play);
+resetBtn.addEventListener('click', reset);
+
+// Стартовое состояние
+reset();
+</script>
+
+</body>
+</html>
